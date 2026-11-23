@@ -34,6 +34,8 @@ Mỗi lần bấm chấm điểm, tạo CV hay tìm job, app hiện một hộp 
 
 App tự đọc kết quả rồi dựng CV, thư xin việc và bảng điểm như chế độ tự động.
 
+![Chế độ sao chép prompt](docs/manual-mode.png)
+
 > Khi **tìm job**, hãy bật tính năng tìm kiếm web trong khung chat (nếu AI bạn dùng có). Nếu không, AI có thể trả về tin cũ hoặc tự bịa. Luôn mở link kiểm tra lại.
 
 ### 2. Tự động: dùng Claude API key (trả phí)
@@ -73,7 +75,7 @@ Bấm **Fork** để có bản của riêng bạn, rồi vào **Settings → Pag
 ## Giới hạn
 
 - Kết quả tìm job phụ thuộc vào công cụ tìm kiếm. Có thể sót tin, và đôi khi có tin cũ lọt qua, nên luôn mở link kiểm tra.
-- Claude được dặn không bịa kinh nghiệm, nhưng bạn vẫn phải **đọc lại CV trước khi nộp**.
+- AI được dặn không bịa kinh nghiệm, nhưng bạn vẫn phải **đọc lại CV trước khi nộp**.
 - Mẫu CV hiện tối ưu cho tiếng Việt, 2 trang A4. Nội dung dài quá sẽ có cảnh báo tràn trang.
 
 ## Giấy phép
