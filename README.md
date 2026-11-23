@@ -21,23 +21,36 @@ Tất cả nằm trong **một file `index.html`**, không cần cài đặt, kh
 
 **Cách 2, trên máy:** tải file `index.html` về rồi mở bằng Chrome, Edge hoặc Firefox.
 
-## Cần chuẩn bị
+## Cần chuẩn bị: chọn một trong hai chế độ
 
-Một **API key của Claude** (Anthropic):
+### 1. Sao chép prompt: miễn phí (mặc định)
+
+Không cần API key, dùng được với **Claude Free, ChatGPT hay Gemini bản miễn phí**.
+
+Mỗi lần bấm chấm điểm, tạo CV hay tìm job, app hiện một hộp thoại:
+1. Bấm **Sao chép yêu cầu**.
+2. Mở khung chat AI mới ([Claude](https://claude.ai/new), [ChatGPT](https://chatgpt.com/), [Gemini](https://gemini.google.com/app)) và dán vào.
+3. Chép toàn bộ câu trả lời, dán lại vào app, bấm **Dùng câu trả lời này**.
+
+App tự đọc kết quả rồi dựng CV, thư xin việc và bảng điểm như chế độ tự động.
+
+> Khi **tìm job**, hãy bật tính năng tìm kiếm web trong khung chat (nếu AI bạn dùng có). Nếu không, AI có thể trả về tin cũ hoặc tự bịa. Luôn mở link kiểm tra lại.
+
+### 2. Tự động: dùng Claude API key (trả phí)
+
+Không cần sao chép qua lại. Lưu ý: gói Claude Free hay Pro **không** bao gồm API, API được tính phí riêng.
 
 1. Đăng ký tại [console.anthropic.com](https://console.anthropic.com), nạp credit.
 2. Vào **Settings → API Keys**, tạo key mới (dạng `sk-ant-...`).
-3. Trong app, vào tab **Cài đặt**, dán key, bấm **Kiểm tra kết nối** rồi **Lưu cài đặt**.
+3. Trong app, vào **Cài đặt**, chọn chế độ **Tự động**, dán key, bấm **Kiểm tra kết nối** rồi **Lưu cài đặt**.
 
-Chi phí tính theo lượt dùng API, thường vài trăm đến vài nghìn đồng cho mỗi lần chấm điểm hoặc viết CV; tìm job tốn hơn vì Claude phải tìm trên web. Xem giá tại [claude.com/pricing](https://claude.com/pricing#api).
-
-> Lưu ý: tính năng tìm job dùng công cụ web search của Claude API. Nếu tài khoản của bạn thuộc một tổ chức, quản trị viên cần bật web search trong Console.
+Chi phí tính theo lượng dùng, xem bảng giá tại [claude.com/pricing](https://claude.com/pricing#api). Tìm job tốn hơn vì Claude phải tìm trên web; nếu tài khoản thuộc một tổ chức, quản trị viên cần bật web search trong Console.
 
 ## Cách dùng
 
-1. **Hồ sơ gốc:** điền họ tên, liên hệ, ảnh, và toàn bộ kinh nghiệm thật theo mẫu có sẵn. Ghi càng cụ thể (số liệu, kết quả) thì CV càng mạnh. Mục *"Chưa xác nhận"* là những thứ bạn chưa làm, để Claude không tự đưa vào CV.
+1. **Hồ sơ gốc:** điền họ tên, liên hệ, ảnh, và toàn bộ kinh nghiệm thật theo mẫu có sẵn. Ghi càng cụ thể (số liệu, kết quả) thì CV càng mạnh. Mục *"Chưa xác nhận"* là những thứ bạn chưa làm, để AI không tự đưa vào CV.
 2. **Tiêu chí tìm job:** từ khóa vị trí (mỗi dòng một), địa điểm, ưu tiên, loại trừ.
-3. **Job:** bấm **Tìm job bằng Claude**, hoặc **+ Thêm job thủ công** rồi dán JD.
+3. **Job:** bấm **Tìm job bằng AI**, hoặc **+ Thêm job thủ công** rồi dán JD.
 4. Với mỗi job:
    - Mở link, chép JD đầy đủ vào **Sửa JD**. Kết quả tìm kiếm thường chỉ có tóm tắt, và các trang tuyển dụng hay chặn đọc tự động.
    - Kiểm tra **hạn nộp**. Nhãn vàng nghĩa là chưa rõ hạn.
@@ -49,7 +62,7 @@ Chi phí tính theo lượt dùng API, thường vài trăm đến vài nghìn �
 ## Dữ liệu và quyền riêng tư
 
 - Hồ sơ, job và API key chỉ lưu trong trình duyệt của bạn (localStorage), không có máy chủ trung gian.
-- Khi bạn bấm các nút dùng Claude, nội dung hồ sơ và JD được gửi thẳng tới `api.anthropic.com` để xử lý.
+- Ở chế độ tự động, nội dung hồ sơ và JD được gửi thẳng tới `api.anthropic.com`. Ở chế độ sao chép prompt, bạn tự dán nội dung vào AI mình chọn, nên hãy đọc qua trước khi gửi.
 - Xóa dữ liệu trình duyệt hoặc đổi máy sẽ **mất dữ liệu**. Hãy dùng **Cài đặt → Xuất file sao lưu** thường xuyên. File sao lưu không chứa API key.
 - Đừng dùng app trên máy tính công cộng, vì API key nằm trong trình duyệt.
 

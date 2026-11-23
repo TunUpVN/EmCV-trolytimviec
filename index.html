@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EmCV – Trợ lý tìm việc: lọc job, viết CV theo JD bằng Claude</title>
+<title>EmCV – Trợ lý tìm việc: lọc job, viết CV theo JD bằng AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -134,7 +134,7 @@ footer.foot a{color:var(--muted)}
     <div class="layout">
       <div class="list">
         <div class="toolbar" id="filters"></div>
-        <div class="toolbar"><button type="button" class="btn" id="findBtn">Tìm job bằng Claude</button><button type="button" class="btn alt" id="addJobBtn">+ Thêm job thủ công</button></div><div id="findMsg" class="note"></div>
+        <div class="toolbar"><button type="button" class="btn" id="findBtn">Tìm job bằng AI</button><button type="button" class="btn alt" id="addJobBtn">+ Thêm job thủ công</button></div><div id="findMsg" class="note"></div>
         <div class="toolbar"><button type="button" class="btn ghost" id="exportXlsx">Xuất bảng Excel</button><span class="note" id="exportMsg"></span></div>
         <div id="jobList"><p class="empty">Chưa có job nào.</p></div>
       </div>
@@ -185,7 +185,12 @@ footer.foot a{color:var(--muted)}
   </section>
   <section id="tab-settings" hidden>
     <div class="panel">
-      <h2>Kết nối Claude</h2>
+      <h2>Cách dùng AI</h2>
+      <label for="sMode">Chế độ</label>
+      <select id="sMode"><option value="manual">Sao chép prompt: miễn phí, dùng claude.ai, ChatGPT hoặc Gemini bản thường</option><option value="api">Tự động: dùng Claude API key (trả phí theo lượt)</option></select>
+      <p class="note" style="margin-top:6px"><b>Sao chép prompt:</b> mỗi lần chấm điểm, viết CV hay tìm job, app soạn sẵn yêu cầu để bạn dán vào khung chat AI, rồi dán câu trả lời ngược lại. Không cần API key.</p>
+      <div id="apiBox">
+      <h2 style="margin-top:16px">Kết nối Claude API</h2>
       <p class="note">App gọi thẳng Claude API bằng API key của bạn. Key chỉ lưu trong trình duyệt này (localStorage), không gửi đi đâu ngoài api.anthropic.com. Lấy key tại <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>; mỗi lần chấm điểm, viết CV hay tìm job sẽ tính phí theo bảng giá API.</p>
       <label for="sKey">Anthropic API key</label>
       <div class="keybox"><input type="password" id="sKey" placeholder="sk-ant-..." autocomplete="off"><button type="button" class="btn ghost" id="sKeyShow">Hiện</button></div>
@@ -194,6 +199,8 @@ footer.foot a{color:var(--muted)}
         <div><label for="sModelFast">Model cho tìm job</label><input type="text" id="sModelFast"></div>
       </div>
       <div class="row" style="margin-top:12px"><button type="button" class="btn" id="saveSettings">Lưu cài đặt</button><button type="button" class="btn ghost" id="testKey">Kiểm tra kết nối</button><span class="note" id="settingsMsg"></span></div>
+      </div>
+      <div class="row" id="manualSave" style="margin-top:12px"><button type="button" class="btn" id="saveSettings2">Lưu cài đặt</button><span class="note" id="settingsMsg2"></span></div>
     </div>
     <div class="panel">
       <h2>Sao lưu dữ liệu</h2>
@@ -204,6 +211,24 @@ footer.foot a{color:var(--muted)}
 </main>
 <footer class="foot">EmCV · mã nguồn mở, miễn phí · dữ liệu lưu trên máy bạn · <a href="https://github.com/TunUpVN/EmCV-trolytimviec" target="_blank" rel="noopener">GitHub</a></footer>
 <div id="printArea"></div>
+<div class="modal" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manTitle">
+  <div class="box">
+    <h2 id="manTitle" style="margin-top:0;font-size:16px">Nhờ AI xử lý giúp</h2>
+    <ol class="plain" style="padding-left:18px;margin:0 0 8px">
+      <li>Bấm <b>Sao chép yêu cầu</b>.</li>
+      <li>Mở một khung chat AI mới và dán vào: <a href="https://claude.ai/new" target="_blank" rel="noopener">Claude</a> · <a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a> · <a href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>.</li>
+      <li>Chép toàn bộ câu trả lời của AI, dán vào ô bên dưới rồi bấm <b>Dùng câu trả lời này</b>.</li>
+    </ol>
+    <div id="manSearchNote" class="warn" hidden>Yêu cầu này cần AI tìm trên web. Hãy bật tính năng tìm kiếm web trong khung chat (nếu có), nếu không AI có thể trả về tin cũ hoặc tự bịa.</div>
+    <label for="manPrompt">Yêu cầu gửi AI</label>
+    <textarea id="manPrompt" readonly style="min-height:120px;font-size:12px"></textarea>
+    <div class="row" style="margin-top:6px"><button type="button" class="btn alt" id="manCopy">Sao chép yêu cầu</button><span class="note" id="manCopyMsg"></span></div>
+    <label for="manAnswer">Câu trả lời của AI</label>
+    <textarea id="manAnswer" style="min-height:140px;font-size:12px" placeholder="Dán câu trả lời vào đây"></textarea>
+    <div id="manErr"></div>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn" id="manUse">Dùng câu trả lời này</button><button type="button" class="btn ghost" id="manCancel">Huỷ</button></div>
+  </div>
+</div>
 
 <div class="modal" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addTitle">
   <div class="box">
@@ -256,7 +281,7 @@ CHƯA XÁC NHẬN – KHÔNG ĐƯỢC TỰ GHI VÀO CV
 - <Những thứ bạn chưa làm, để Claude không tự thêm vào CV>`
 };
 const DEFAULT_CRITERIA={keys:"",loc:"",salary:"",prefer:"",exclude:"",sources:"TopCV, VietnamWorks, CareerViet, Glints, JobsGO, tìm rộng trên web",max:"8"};
-const DEFAULT_SETTINGS={key:"",model:"claude-sonnet-5-5",modelFast:"claude-sonnet-5-5"};
+const DEFAULT_SETTINGS={mode:"manual",key:"",model:"claude-sonnet-5-5",modelFast:"claude-sonnet-5-5"};
 
 // ---------- storage (localStorage) ----------
 const LS="tlut_v1";
@@ -280,7 +305,6 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
 (function init(){
   fillProfileForm();fillCriteriaForm();fillSettingsForm();renderFilters();refreshJobs();renderList();
   setStatus(jobs.length?jobs.length+" job đã lưu trên máy này.":"Chưa có job. Điền Hồ sơ gốc và Cài đặt trước, rồi bấm Tìm job bằng Claude hoặc Thêm job thủ công.");
-  if(!settings.key){document.querySelector('nav.tabs button[data-tab="settings"]').style.borderColor="#ffd28a"}
 })();
 function commitJobs(){persist();refreshJobs();renderList();if(selectedId)renderDetail();setStatus(jobs.length+" job đã lưu trên máy này.")}
 
@@ -507,7 +531,7 @@ function renderPreview(cv){
 
 // ---------- Claude ----------
 function profileText(){return `HỌ TÊN: ${profile.name}\n${profile.facts}\n\nHỌC VẤN:\n${profile.edu}\nNGOẠI NGỮ:\n${profile.lang}\nGIẢI THƯỞNG:\n${profile.award}`}
-function friendlyErr(e){const st=e&&e.status;if(st===401)return "API key không đúng hoặc đã bị thu hồi.";if(st===429)return "Đang bị giới hạn lượt gọi API, hãy thử lại sau ít phút.";if(st===400&&/credit/i.test(e.message||""))return "Tài khoản API hết credit. Nạp thêm tại console.anthropic.com.";if(st===529||st===503)return "Claude đang quá tải, thử lại sau.";return "Lỗi: "+((e&&e.message)||e)}
+function friendlyErr(e){if(e&&e.message==="Đã huỷ")return "Đã huỷ yêu cầu.";const st=e&&e.status;if(st===401)return "API key không đúng hoặc đã bị thu hồi.";if(st===429)return "Đang bị giới hạn lượt gọi API, hãy thử lại sau ít phút.";if(st===400&&/credit/i.test(e.message||""))return "Tài khoản API hết credit. Nạp thêm tại console.anthropic.com.";if(st===529||st===503)return "Claude đang quá tải, thử lại sau.";return "Lỗi: "+((e&&e.message)||e)}
 async function claudeCall(body){
   const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":settings.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
   const data=await res.json().catch(()=>({}));
@@ -521,6 +545,7 @@ function extractJSON(text){
   return JSON.parse(t.slice(st,en+1));
 }
 async function claudeJSON(prompt,{model,maxTokens,tools,maxTurns}={}){
+  if(settings.mode!=="api"){const t=await manualAsk(prompt+"\n\nChỉ trả về JSON hợp lệ, không thêm chữ nào khác.",!!tools);return extractJSON(t)}
   let messages=[{role:"user",content:prompt+"\n\nChỉ trả về JSON hợp lệ, không thêm chữ nào khác, không bọc trong ```."}];
   let text="";
   for(let turn=0;turn<(maxTurns||1)+1;turn++){
@@ -533,7 +558,7 @@ async function claudeJSON(prompt,{model,maxTokens,tools,maxTurns}={}){
   return extractJSON(text);
 }
 async function doScore(){
-  const j=current();if(!j)return;if(!settings.key){$("msg").innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập.</div>';return}
+  const j=current();if(!j)return;if(settings.mode==="api"&&!settings.key){$("msg").innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập, hoặc chọn chế độ sao chép prompt.</div>';return}
   busy.score=true;renderDetail();
   const prompt=`Bạn là chuyên gia tuyển dụng marketing tại Việt Nam. Đánh giá độ phù hợp giữa ứng viên và tin tuyển dụng dưới đây, trung thực, không khen xã giao.
 
@@ -557,7 +582,7 @@ Trả về JSON đúng dạng: {"score": số 0-100, "verdict": "một câu kế
   }catch(e){busy.score=false;renderDetail();$("msg").innerHTML=`<div class="err">${esc(friendlyErr(e))}</div>`}
 }
 async function doGenerate(){
-  const j=current();if(!j)return;if(!settings.key){$("msg").innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập.</div>';return}
+  const j=current();if(!j)return;if(settings.mode==="api"&&!settings.key){$("msg").innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập, hoặc chọn chế độ sao chép prompt.</div>';return}
   if(!profile.name||!profile.facts||profile.facts.includes("<Tên công ty>")){$("msg").innerHTML='<div class="err">Hãy điền Hồ sơ gốc (họ tên và kinh nghiệm thật) trước khi tạo CV.</div>';return}
   busy.gen=true;renderDetail();
   const prompt=`Bạn là chuyên gia viết CV marketing tại Việt Nam. Viết lại CV 2 trang A4 và thư xin việc cho ứng viên, tối ưu cho tin tuyển dụng dưới đây.
@@ -650,13 +675,16 @@ async function doPdf(){
 }
 
 // ---------- settings ----------
-function fillSettingsForm(){$("sKey").value=settings.key||"";$("sModel").value=settings.model||"";$("sModelFast").value=settings.modelFast||""}
+function syncMode(){const m=$("sMode").value;$("apiBox").hidden=(m!=="api");$("manualSave").hidden=(m==="api")}
+$("sMode").addEventListener("change",syncMode);
+function saveSettingsAll(msgId){
+  settings={mode:$("sMode").value,key:$("sKey").value.trim(),model:$("sModel").value.trim()||DEFAULT_SETTINGS.model,modelFast:$("sModelFast").value.trim()||DEFAULT_SETTINGS.modelFast};
+  store.settings=settings;$(msgId).textContent=persist()?"Đã lưu.":"Lưu lỗi.";
+}
+$("saveSettings2").addEventListener("click",()=>saveSettingsAll("settingsMsg2"));
+function fillSettingsForm(){$("sMode").value=settings.mode||"manual";syncMode();$("sKey").value=settings.key||"";$("sModel").value=settings.model||"";$("sModelFast").value=settings.modelFast||""}
 $("sKeyShow").addEventListener("click",()=>{const k=$("sKey");k.type=k.type==="password"?"text":"password";$("sKeyShow").textContent=k.type==="password"?"Hiện":"Ẩn"});
-$("saveSettings").addEventListener("click",()=>{
-  settings={key:$("sKey").value.trim(),model:$("sModel").value.trim()||DEFAULT_SETTINGS.model,modelFast:$("sModelFast").value.trim()||DEFAULT_SETTINGS.modelFast};
-  store.settings=settings;$("settingsMsg").textContent=persist()?"Đã lưu.":"Lưu lỗi.";
-  document.querySelector('nav.tabs button[data-tab="settings"]').style.borderColor="";
-});
+$("saveSettings").addEventListener("click",()=>saveSettingsAll("settingsMsg"));
 $("testKey").addEventListener("click",async()=>{
   const key=$("sKey").value.trim();if(!key){$("settingsMsg").textContent="Chưa nhập API key.";return}
   settings={...settings,key,model:$("sModel").value.trim()||DEFAULT_SETTINGS.model};
@@ -691,9 +719,9 @@ $("wipeBtn").addEventListener("click",()=>{
 $("findBtn").addEventListener("click",doFind);
 async function doFind(){
   const msg=$("findMsg");
-  if(!settings.key){msg.innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập.</div>';return}
+  if(settings.mode==="api"&&!settings.key){msg.innerHTML='<div class="err">Chưa có API key. Vào mục Cài đặt để nhập, hoặc chọn chế độ sao chép prompt.</div>';return}
   if(!lines(criteria.keys).length){msg.innerHTML='<div class="err">Hãy điền Tiêu chí tìm job (từ khóa vị trí, địa điểm) trước.</div>';return}
-  const btn=$("findBtn");btn.disabled=true;btn.textContent="Đang tìm… (1–3 phút)";msg.textContent="";
+  const btn=$("findBtn");btn.disabled=true;btn.textContent=settings.mode==="api"?"Đang tìm… (1–3 phút)":"Đang chờ câu trả lời…";msg.textContent="";
   const today=new Date();const ds=today.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"});
   const known=jobs.map(j=>j.url).filter(Boolean).slice(0,80);
   const max=Math.min(15,Math.max(1,parseInt(criteria.max)||8));
@@ -724,8 +752,29 @@ Trả về JSON là một mảng tối đa ${max} phần tử, mỗi phần tử
     });
     commitJobs();msg.textContent=added?`Đã thêm ${added} job mới.`:"Không tìm thấy job mới phù hợp.";
   }catch(e){msg.innerHTML=`<div class="err">${esc(friendlyErr(e))}</div>`}
-  btn.disabled=false;btn.textContent="Tìm job bằng Claude";
+  btn.disabled=false;btn.textContent="Tìm job bằng AI";
 }
+
+// ---------- manual (copy prompt) mode ----------
+let manualPending=null;
+function manualAsk(prompt,needsSearch){
+  return new Promise((resolve,reject)=>{
+    if(manualPending)manualPending.reject(new Error("Đã huỷ"));
+    manualPending={resolve,reject};
+    $("manPrompt").value=prompt;$("manAnswer").value="";$("manErr").innerHTML="";$("manCopyMsg").textContent="";
+    $("manSearchNote").hidden=!needsSearch;$("manualModal").classList.add("show");$("manCopy").focus();
+  });
+}
+$("manCopy").addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText($("manPrompt").value);$("manCopyMsg").textContent="Đã sao chép. Giờ dán vào khung chat AI."}
+  catch(e){$("manPrompt").focus();$("manPrompt").select();$("manCopyMsg").textContent="Trình duyệt chặn sao chép tự động: nội dung đã được bôi đen, nhấn Ctrl+C."}
+});
+$("manUse").addEventListener("click",()=>{
+  const t=$("manAnswer").value.trim();if(!t){$("manAnswer").focus();return}
+  try{extractJSON(t)}catch(e){$("manErr").innerHTML='<div class="err">Không đọc được câu trả lời. Hãy chép toàn bộ phần JSON (bắt đầu bằng { hoặc [). Nếu AI trả lời bằng chữ, nhắn thêm cho nó: "Chỉ trả về JSON".</div>';return}
+  const p=manualPending;manualPending=null;$("manualModal").classList.remove("show");p&&p.resolve(t);
+});
+$("manCancel").addEventListener("click",()=>{const p=manualPending;manualPending=null;$("manualModal").classList.remove("show");p&&p.reject(new Error("Đã huỷ"))});
 </script>
 </body>
 </html>
