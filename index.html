@@ -126,6 +126,7 @@ footer.foot a{color:var(--muted)}
     <button type="button" data-tab="criteria">Tiêu chí tìm job</button>
     <button type="button" data-tab="settings">Cài đặt</button>
   </nav>
+  <button type="button" id="aboutBtn" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 14px;border-radius:20px;cursor:pointer;font:inherit">Tác giả</button>
 </header>
 <main>
   <p class="status" id="status">Đang kết nối dữ liệu…</p>
@@ -209,8 +210,24 @@ footer.foot a{color:var(--muted)}
     </div>
   </section>
 </main>
-<footer class="foot">EmCV · mã nguồn mở, miễn phí · dữ liệu lưu trên máy bạn · <a href="https://github.com/TunUpVN/EmCV-trolytimviec" target="_blank" rel="noopener">GitHub</a></footer>
+<footer class="foot">EmCV · miễn phí, mã nguồn mở · dữ liệu lưu trên máy bạn · Làm bởi <a href="https://github.com/TunUpVN" target="_blank" rel="noopener">Đỗ Thanh Tùng</a> · <span>dttung.2191@gmail.com</span> · <a href="https://github.com/TunUpVN/EmCV-trolytimviec" target="_blank" rel="noopener">GitHub</a></footer>
 <div id="printArea"></div>
+<div class="modal" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="box" style="max-width:560px">
+    <h2 id="aboutTitle" style="margin-top:0;font-size:18px">Về tác giả</h2>
+    <p style="margin:0 0 6px"><b style="font-size:16px">Đỗ Thanh Tùng</b></p>
+    <p style="margin:0 0 10px;color:var(--muted)">Marketing · Thương hiệu · Ứng dụng AI</p>
+    <p>Hơn 10 năm làm marketing, trong đó 8 năm trong giáo dục, đào tạo. Ngoài công việc, tôi tự xây các công cụ AI để làm việc nhanh hơn, như <a href="https://github.com/TunUpVN/tun-ideas" target="_blank" rel="noopener">Tun Ideas</a> (phòng chat nhiều AI) và EmCV.</p>
+    <p>EmCV ra đời khi tôi đi tìm việc và thấy việc lọc tin, sửa CV cho từng vị trí quá mất thời gian. Tôi chia sẻ miễn phí, mong giúp được bạn bớt vất vả hơn.</p>
+    <p>Tôi đang tìm cơ hội mới ở vị trí quản lý marketing, thương hiệu. Nếu bạn đang tuyển hoặc muốn góp ý cho EmCV, rất mong nhận được thư của bạn.</p>
+    <div class="row" style="margin:12px 0 4px">
+      <span>Email: <b>dttung.2191@gmail.com</b></span>
+      <button type="button" class="btn ghost" id="copyEmail" style="min-height:32px;padding:4px 10px">Sao chép email</button>
+    </div>
+    <p style="margin:4px 0">GitHub: <a href="https://github.com/TunUpVN" target="_blank" rel="noopener">github.com/TunUpVN</a></p>
+    <div class="row" style="margin-top:14px"><button type="button" class="btn" id="aboutClose">Đóng</button></div>
+  </div>
+</div>
 <div class="modal" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manTitle">
   <div class="box">
     <h2 id="manTitle" style="margin-top:0;font-size:16px">Nhờ AI xử lý giúp</h2>
@@ -775,6 +792,12 @@ $("manUse").addEventListener("click",()=>{
   const p=manualPending;manualPending=null;$("manualModal").classList.remove("show");p&&p.resolve(t);
 });
 $("manCancel").addEventListener("click",()=>{const p=manualPending;manualPending=null;$("manualModal").classList.remove("show");p&&p.reject(new Error("Đã huỷ"))});
+
+// ---------- author ----------
+$("aboutBtn").addEventListener("click",()=>$("aboutModal").classList.add("show"));
+$("aboutClose").addEventListener("click",()=>$("aboutModal").classList.remove("show"));
+$("aboutModal").addEventListener("click",e=>{if(e.target.id==="aboutModal")$("aboutModal").classList.remove("show")});
+$("copyEmail").addEventListener("click",async()=>{try{await navigator.clipboard.writeText("dttung.2191@gmail.com");$("copyEmail").textContent="Đã sao chép"}catch(e){$("copyEmail").textContent="dttung.2191@gmail.com"}});
 </script>
 </body>
 </html>

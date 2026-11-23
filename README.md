@@ -78,6 +78,21 @@ Bấm **Fork** để có bản của riêng bạn, rồi vào **Settings → Pag
 - AI được dặn không bịa kinh nghiệm, nhưng bạn vẫn phải **đọc lại CV trước khi nộp**.
 - Mẫu CV hiện tối ưu cho tiếng Việt, 2 trang A4. Nội dung dài quá sẽ có cảnh báo tràn trang.
 
+## Tác giả
+
+**Đỗ Thanh Tùng**: marketing, thương hiệu và ứng dụng AI.
+
+Hơn 10 năm làm marketing, trong đó 8 năm trong giáo dục, đào tạo. Ngoài công việc, tôi tự xây các công cụ AI để làm việc nhanh hơn, như [Tun Ideas](https://github.com/TunUpVN/tun-ideas) (phòng chat nhiều AI) và EmCV.
+
+EmCV ra đời khi tôi đi tìm việc và thấy việc lọc tin, sửa CV cho từng vị trí quá mất thời gian. Tôi chia sẻ miễn phí, mong giúp được bạn bớt vất vả hơn.
+
+Tôi đang tìm cơ hội mới ở vị trí quản lý marketing, thương hiệu. Nếu bạn đang tuyển hoặc muốn góp ý cho EmCV, rất mong nhận được thư của bạn.
+
+- Email: dttung.2191@gmail.com
+- GitHub: [github.com/TunUpVN](https://github.com/TunUpVN)
+
+Góp ý, báo lỗi: mở mục [Issues](https://github.com/TunUpVN/EmCV-trolytimviec/issues) của repo.
+
 ## Giấy phép
 
 [MIT](LICENSE): dùng, sửa, chia sẻ tự do.
