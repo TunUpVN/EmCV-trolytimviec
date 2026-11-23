@@ -556,10 +556,25 @@ async function claudeCall(body){
   return data;
 }
 function extractJSON(text){
-  const t=String(text||"").replace(/```(?:json)?/g,"");
-  const starts=[t.indexOf("{"),t.indexOf("[")].filter(i=>i>=0);if(!starts.length)throw new Error("Claude không trả về JSON.");
-  const st=Math.min(...starts);const close=t[st]==="{"?"}":"]";const en=t.lastIndexOf(close);
-  return JSON.parse(t.slice(st,en+1));
+  const t=String(text||"").replace(/```[a-zA-Z]*/g,"");
+  const tryParse=s=>{try{return {ok:true,v:JSON.parse(s)}}catch(e){}
+    const c=s.replace(/,(\s*[}\]])/g,"$1");try{return {ok:true,v:JSON.parse(c)}}catch(e){return {ok:false}}};
+  let fallback=null;
+  for(let st=0;st<t.length;st++){
+    const ch=t[st];if(ch!=="{"&&ch!=="[")continue;
+    let depth=0,inStr=false,esc=false,end=-1;
+    for(let k=st;k<t.length;k++){const c=t[k];
+      if(inStr){if(esc)esc=false;else if(c==="\\")esc=true;else if(c==='"')inStr=false;continue}
+      if(c==='"')inStr=true;else if(c==="{"||c==="[")depth++;else if(c==="}"||c==="]"){depth--;if(depth===0){end=k;break}}}
+    if(end<0)continue;
+    const r=tryParse(t.slice(st,end+1));
+    if(!r.ok||!r.v||typeof r.v!=="object")continue;
+    if(!Array.isArray(r.v))return r.v;
+    if(r.v.length&&r.v.every(o=>o&&typeof o==="object"&&!Array.isArray(o)))return r.v;
+    if(!r.v.length&&!fallback)fallback=r.v;
+  }
+  if(fallback)return fallback;
+  throw new Error("AI không trả về JSON.");
 }
 async function claudeJSON(prompt,{model,maxTokens,tools,maxTurns}={}){
   if(settings.mode!=="api"){const t=await manualAsk(prompt+"\n\nChỉ trả về JSON hợp lệ, không thêm chữ nào khác.",!!tools);return extractJSON(t)}
