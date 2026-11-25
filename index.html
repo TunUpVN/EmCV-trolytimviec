@@ -439,7 +439,8 @@ function renderDetail(){
         <div><label for="rSalary">Mức lương đề nghị / chốt</label><input type="text" id="rSalary" value="${esc(r.salary||"")}"></div>
       </div>
       <label for="rNote">Kết quả / phản hồi</label><textarea id="rNote">${esc(r.note||"")}</textarea>
-      <div class="row" style="margin-top:10px"><button type="button" class="btn" id="bResult">Lưu kết quả</button><span class="note" id="rMsg">${r.updatedAt?"Cập nhật lần cuối "+esc(new Date(r.updatedAt).toLocaleString("vi-VN")):""}</span></div></div>`+h;
+      <div class="row" style="margin-top:10px"><button type="button" class="btn" id="bResult">Lưu kết quả</button><span class="note" id="rMsg">${r.updatedAt?"Cập nhật lần cuối "+esc(new Date(r.updatedAt).toLocaleString("vi-VN")):""}</span></div>
+      ${replyBoxHtml(j)}</div>`+h;
   }
   if(j.fit){
     const f=j.fit;
@@ -476,6 +477,7 @@ function renderDetail(){
     const res={interviewDate:$("rIvDate").value.trim(),round:$("rRound").value.trim(),contact:$("rContact").value.trim(),salary:$("rSalary").value.trim(),note:$("rNote").value.trim(),updatedAt:new Date().toISOString()};
     await saveJob({status:$("rStatus").value,appliedAt:$("rApplied").value.trim()||j.appliedAt||"",result:res});
   };
+  if($("ivType"))bindReply(j);
   $("bScore").onclick=()=>doScore();if($("bDl"))$("bDl").onclick=()=>saveJob({deadline:$("dlIn").value.trim()});$("bGen").onclick=()=>doGenerate();
   $("bEditJd").onclick=()=>{const t=document.createElement("textarea");t.value=j.jd||"";t.style.minHeight="240px";t.id="jdEdit";
     const box=d.querySelector(".jd");box.replaceWith(t);const s=document.createElement("button");s.className="btn";s.type="button";s.textContent="Lưu JD";s.style.marginTop="6px";
@@ -496,6 +498,88 @@ function collectEdits(j){
   let exp;try{exp=JSON.parse($("eExp").value)}catch(e){$("msg2").textContent="Phần Kinh nghiệm bị lỗi định dạng JSON, hãy kiểm tra dấu ngoặc và dấu phẩy.";return null}
   const plan=$("ePlan").value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf("|");return i<0?{title:l,text:""}:{title:l.slice(0,i).trim(),text:l.slice(i+1).trim()}});
   return {...j.cv,tagline:$("eTag").value,summary:$("eSum").value,experience:exp,plan,letter_subject:$("eSubj").value,letter:$("eLetter").value};
+}
+// ---------- Trả lời email mời phỏng vấn ----------
+const REPLY_TYPES=[["confirm","Xác nhận tham gia"],["reschedule","Xin đổi lịch"],["decline","Từ chối lịch sự"],["thanks","Cảm ơn sau phỏng vấn"]];
+function niceName(n){return String(n||"").toLocaleLowerCase("vi").split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("vi")+w.slice(1)).join(" ")}
+function replyBoxHtml(j){
+  const rp=j.reply||{};const def=rp.type||((j.status==="interviewed"||j.status==="waiting")?"thanks":"confirm");
+  const opts=REPLY_TYPES.map(([k,l])=>`<option value="${k}" ${def===k?"selected":""}>${esc(l)}</option>`).join("");
+  return `<h3 style="margin-top:16px">Trả lời email mời phỏng vấn</h3>
+    <label for="ivMail">Dán email mời phỏng vấn (không bắt buộc, giúp AI lấy đúng giờ, địa điểm, người liên hệ)</label>
+    <textarea id="ivMail" style="min-height:110px" placeholder="Dán nguyên văn email nhà tuyển dụng gửi">${esc(rp.invite||"")}</textarea>
+    <div class="two">
+      <div><label for="ivType">Loại thư</label><select id="ivType">${opts}</select></div>
+      <div><label for="ivTo">Gửi tới (email nhà tuyển dụng)</label><input type="text" id="ivTo" value="${esc(rp.to||"")}" placeholder="vd hr@congty.vn"></div>
+      <div><label for="ivLoc">Địa điểm / link họp</label><input type="text" id="ivLoc" value="${esc(rp.location||"")}" placeholder="vd Tầng 14, 21 Lê Đức Thọ"></div>
+      <div><label for="ivExtra">Ghi chú thêm</label><input type="text" id="ivExtra" value="${esc(rp.extra||"")}" placeholder="vd đề xuất 14h thứ Sáu, lý do từ chối"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button type="button" class="btn ghost" id="bIvTpl">Soạn nhanh theo mẫu</button>
+      <button type="button" class="btn alt" id="bIvAi" ${busy.reply?"disabled":""}>${busy.reply?"Đang soạn…":"Soạn bằng AI"}</button>
+    </div>
+    <label for="ivSubj">Tiêu đề</label><input type="text" id="ivSubj" value="${esc(rp.subject||"")}">
+    <label for="ivBody">Nội dung</label><textarea id="ivBody" style="min-height:220px">${esc(rp.body||"")}</textarea>
+    <div class="row" style="margin-top:10px">
+      <button type="button" class="btn" id="bIvSave">Lưu thư</button>
+      <button type="button" class="btn ghost" id="bIvCopy">Sao chép</button>
+      <button type="button" class="btn ghost" id="bIvMail">Mở trong ứng dụng email</button>
+    </div>
+    <div class="note" id="ivMsg" style="margin-top:6px">Mẹo: trả lời ngay trong luồng email nhà tuyển dụng đã gửi, trong vòng 24 giờ.</div>`;
+}
+function replyTemplate(type,d){
+  const hi=`Kính gửi Anh/Chị ${d.contact||"[Tên người gửi]"},`;
+  const me=`Tôi là ${d.name}, ứng viên vị trí ${d.title||"[vị trí]"}${d.company?" tại "+d.company:""}.`;
+  const when=d.date||"[thời gian phỏng vấn]";
+  const sign=`Trân trọng,\n${d.name}${d.phone?"\nĐiện thoại: "+d.phone:""}${d.email?"\nEmail: "+d.email:""}`;
+  const round=d.round?` (${d.round})`:"";
+  if(type==="reschedule")return{subject:`Xin đổi lịch phỏng vấn – ${d.name} – ${d.title||""}`,body:`${hi}\n\n${me}\n\nCảm ơn Anh/Chị đã gửi lời mời phỏng vấn${round}. Tôi rất mong được tham gia, tuy nhiên vào ${when} tôi có việc đột xuất không thể sắp xếp được.\n\nTôi xin phép đề xuất ${d.extra||"[khung giờ khác, vd 14h00 thứ Sáu, ngày ...]"}. Nếu thời gian này chưa phù hợp, tôi rất sẵn lòng theo lịch khác Anh/Chị đề xuất.\n\nXin lỗi Anh/Chị vì sự bất tiện này và cảm ơn Anh/Chị đã thông cảm.\n\n${sign}`};
+  if(type==="decline")return{subject:`Phản hồi lời mời phỏng vấn – ${d.name} – ${d.title||""}`,body:`${hi}\n\n${me}\n\nCảm ơn Anh/Chị đã dành thời gian xem hồ sơ và gửi lời mời phỏng vấn. Sau khi cân nhắc, tôi xin phép không tham gia buổi phỏng vấn lần này vì ${d.extra||"tôi đã nhận một cơ hội khác phù hợp hơn với định hướng hiện tại"}.\n\nTôi đánh giá cao sự chuyên nghiệp của ${d.company||"Quý Công ty"} và mong có dịp hợp tác trong tương lai.\n\n${sign}`};
+  if(type==="thanks")return{subject:`Cảm ơn buổi phỏng vấn – ${d.name} – ${d.title||""}`,body:`${hi}\n\nCảm ơn Anh/Chị đã dành thời gian trao đổi với tôi${d.date?" vào "+d.date:""} về vị trí ${d.title||"[vị trí]"}.\n\nBuổi trao đổi giúp tôi hiểu rõ hơn về mục tiêu và cách làm việc của ${d.company||"Quý Công ty"}. Tôi càng tin mình có thể đóng góp${d.extra?", đặc biệt ở "+d.extra:" vào các mục tiêu đã trao đổi"}.\n\nNếu cần thêm thông tin hay tài liệu nào, Anh/Chị vui lòng cho tôi biết. Tôi mong nhận được phản hồi từ Anh/Chị.\n\n${sign}`};
+  return{subject:`Xác nhận tham gia phỏng vấn – ${d.name} – ${d.title||""}`,body:`${hi}\n\n${me}\n\nCảm ơn Anh/Chị đã gửi lời mời. Tôi xin xác nhận sẽ tham gia buổi phỏng vấn${round} vào ${when}${d.loc?", tại "+d.loc:""}.\n\n${d.extra?d.extra+"\n\n":""}Nếu cần tôi chuẩn bị thêm tài liệu gì, Anh/Chị vui lòng cho tôi biết.\n\n${sign}`};
+}
+function replyData(j){return{name:niceName(profile.name),phone:profile.phone||"",email:profile.email||"",title:j.title||"",company:(j.company&&j.company===j.company.toLocaleUpperCase("vi"))?niceName(j.company):(j.company||""),
+  contact:($("rContact")&&$("rContact").value.trim())||"",date:($("rIvDate")&&$("rIvDate").value.trim())||"",round:($("rRound")&&$("rRound").value.trim())||"",
+  loc:$("ivLoc").value.trim(),extra:$("ivExtra").value.trim()}}
+function collectReply(){return{type:$("ivType").value,invite:$("ivMail").value,to:$("ivTo").value.trim(),location:$("ivLoc").value.trim(),extra:$("ivExtra").value.trim(),subject:$("ivSubj").value,body:$("ivBody").value,updatedAt:new Date().toISOString()}}
+function bindReply(j){
+  $("bIvTpl").onclick=()=>{const t=replyTemplate($("ivType").value,replyData(j));$("ivSubj").value=t.subject;$("ivBody").value=t.body;$("ivMsg").textContent="Đã soạn theo mẫu. Kiểm tra lại các chỗ trong [ngoặc vuông] trước khi gửi."};
+  $("bIvAi").onclick=()=>doReplyAI(j);
+  $("bIvSave").onclick=async()=>{await saveJob({reply:collectReply()});const m=$("ivMsg");if(m)m.textContent="Đã lưu thư."};
+  $("bIvCopy").onclick=async()=>{const t=$("ivSubj").value+"\n\n"+$("ivBody").value;try{await navigator.clipboard.writeText(t);$("ivMsg").textContent="Đã sao chép tiêu đề và nội dung."}catch(e){$("ivBody").select();$("ivMsg").textContent="Trình duyệt chặn sao chép tự động, nội dung đã được bôi đen, hãy nhấn Ctrl+C."}};
+  $("bIvMail").onclick=()=>{const u="mailto:"+encodeURIComponent($("ivTo").value.trim())+"?subject="+encodeURIComponent($("ivSubj").value)+"&body="+encodeURIComponent($("ivBody").value);const w=window.open(u,"_blank");if(!w)location.href=u};
+}
+async function doReplyAI(j){
+  if(settings.mode==="api"&&!settings.key){$("ivMsg").textContent="Chưa có API key. Vào Cài đặt để nhập, chọn chế độ sao chép prompt, hoặc dùng nút Soạn nhanh theo mẫu.";return}
+  const keep=collectReply();const d=replyData(j);const tl=(REPLY_TYPES.find(x=>x[0]===keep.type)||REPLY_TYPES[0])[1];
+  busy.reply=true;await saveJob({reply:keep});
+  const prompt=`Bạn là trợ lý viết email tuyển dụng chuyên nghiệp tại Việt Nam. Soạn email trả lời nhà tuyển dụng.
+
+LOẠI THƯ: ${tl}
+ỨNG VIÊN: ${d.name}; điện thoại ${d.phone}; email ${d.email}
+VỊ TRÍ: ${d.title}; CÔNG TY: ${d.company}
+THÔNG TIN ĐÃ BIẾT: thời gian phỏng vấn "${d.date}"; vòng "${d.round}"; người liên hệ "${d.contact}"; địa điểm "${d.loc}"
+GHI CHÚ CỦA ỨNG VIÊN: ${d.extra||"(không có)"}
+EMAIL MỜI CỦA NHÀ TUYỂN DỤNG:
+${keep.invite||"(ứng viên không dán email mời)"}
+
+QUY TẮC:
+1. Chỉ dùng thông tin có trong email mời và thông tin ở trên. Không bịa giờ, địa điểm, tên người. Thiếu thì để chỗ trống dạng [ngoặc vuông].
+2. Lịch sự, ngắn gọn 80-160 từ, xưng "tôi", gọi người nhận theo tên trong email mời (Anh/Chị + tên) nếu có. Nhắc lại đúng ngày giờ, địa điểm hoặc hình thức nếu email mời có.
+3. Nếu email mời yêu cầu mang tài liệu, chuẩn bị bài test hay xác nhận theo cách cụ thể, phản hồi đúng yêu cầu đó.
+4. Nếu email mời viết bằng tiếng Anh thì trả lời bằng tiếng Anh, ngược lại viết tiếng Việt.
+5. Kết thư bằng "Trân trọng," rồi họ tên, điện thoại, email.
+
+Trả về JSON đúng dạng: {"subject":"tiêu đề, nếu email mời có tiêu đề thì dùng dạng Re: <tiêu đề gốc>","body":"nội dung thư","to":"email người gửi lời mời nếu có, không có để rỗng","interviewDate":"ngày giờ phỏng vấn dạng dd/mm/yyyy hh:mm nếu email mời có, không có để rỗng","location":"địa điểm hoặc link họp nếu có","contact":"tên và số điện thoại người liên hệ nếu có","round":"vòng phỏng vấn nếu có"}`;
+  try{
+    const ai=await claudeJSON(prompt,{model:settings.model,maxTokens:1500});
+    const reply={...keep,subject:ai.subject||keep.subject,body:ai.body||keep.body,to:keep.to||ai.to||"",location:keep.location||ai.location||"",updatedAt:new Date().toISOString()};
+    const r0=j.result||{};const res={...r0};let fill=false;
+    [["interviewDate","interviewDate","rIvDate"],["contact","contact","rContact"],["round","round","rRound"]].forEach(([k,ak,id])=>{const cur=($(id)&&$(id).value.trim())||r0[k]||"";if(!cur&&ai[ak]){res[k]=ai[ak];fill=true}else if(cur)res[k]=cur});
+    const patch={reply};if(fill){res.updatedAt=new Date().toISOString();patch.result=res}
+    busy.reply=false;await saveJob(patch);
+    const m=$("ivMsg");if(m)m.textContent=fill?"Đã soạn thư và điền giúp thời gian, người liên hệ, vòng phỏng vấn từ email mời. Kiểm tra lại trước khi gửi.":"Đã soạn thư. Kiểm tra lại trước khi gửi.";
+  }catch(e){busy.reply=false;renderDetail();const m=$("ivMsg");if(m)m.textContent=friendlyErr(e)}
 }
 function fitPreview(){const w=$("pvWrap"),s=$("pvScale");if(!w||!s)return;const k=Math.min(1,(w.clientWidth-32)/794);s.style.transform=`scale(${k})`;s.style.height=(1123*2+16)*k+"px";s.style.width=794*k+"px"}
 window.addEventListener("resize",fitPreview);

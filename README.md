@@ -9,6 +9,7 @@ Công cụ miễn phí giúp người tìm việc ở Việt Nam bớt việc l�
 - **Viết lại CV 2 trang A4 và thư xin việc** cho từng job, chỉ dùng kinh nghiệm thật trong hồ sơ gốc của bạn, không bịa thêm.
 - **Bạn duyệt, sửa, rồi tự nộp.** App không tự gửi gì cho nhà tuyển dụng.
 - **Theo dõi kết quả:** đã nộp, được gọi phỏng vấn, chờ kết quả, nhận offer, bị từ chối…, kèm ngày phỏng vấn, vòng, người liên hệ, phản hồi.
+- **Soạn email trả lời nhà tuyển dụng**: xác nhận lịch phỏng vấn, xin đổi lịch, từ chối lịch sự hoặc cảm ơn sau phỏng vấn. Soạn nhanh theo mẫu, hoặc dán email mời để AI viết thư và tự điền giờ, người liên hệ, vòng phỏng vấn.
 - **Xuất bảng Excel** (.xlsx) gồm tổng quan theo trạng thái, danh sách đơn đã ứng tuyển và các job chưa nộp.
 
 Tất cả nằm trong **một file `index.html`**, không cần cài đặt, không có máy chủ. Dữ liệu lưu ngay trong trình duyệt của bạn.
@@ -59,7 +60,7 @@ Chi phí tính theo lượng dùng, xem bảng giá tại [claude.com/pricing](h
    - **Chấm độ phù hợp**, rồi **Tạo CV và thư**.
    - Xem trước, sửa nhanh, đổi màu, rồi **In / Lưu CV thành PDF**. Trong hộp thoại in, chọn *Lưu thành PDF*, khổ A4, lề *Không*, bật *Đồ họa nền*. File PDF có chữ thật, hệ thống lọc CV tự động (ATS) đọc được.
    - Sao chép thư, tự nộp, rồi bấm **Đánh dấu đã nộp**.
-5. Khi có phản hồi, mở job trong mục **Đã ứng tuyển** và cập nhật ô **Kết quả tuyển dụng**. Bấm **Xuất bảng Excel** để có file theo dõi.
+5. Khi có phản hồi, mở job trong mục **Đã ứng tuyển** và cập nhật ô **Kết quả tuyển dụng**. Nhận được email mời phỏng vấn thì dùng phần **Trả lời email mời phỏng vấn** ngay bên dưới. Bấm **Xuất bảng Excel** để có file theo dõi.
 
 ## Dữ liệu và quyền riêng tư
 
