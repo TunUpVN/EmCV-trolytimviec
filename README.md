@@ -9,6 +9,7 @@ Công cụ miễn phí giúp người tìm việc ở Việt Nam bớt việc l�
 - **Viết lại CV 2 trang A4 và thư xin việc** cho từng job, chỉ dùng kinh nghiệm thật trong hồ sơ gốc của bạn, không bịa thêm.
 - **Bạn duyệt, sửa, rồi tự nộp.** App không tự gửi gì cho nhà tuyển dụng.
 - **Theo dõi kết quả:** đã nộp, được gọi phỏng vấn, chờ kết quả, nhận offer, bị từ chối…, kèm ngày phỏng vấn, vòng, người liên hệ, phản hồi.
+- **Nhận diện bản chất vị trí** khi chấm điểm: thực chất là quảng cáo chuyển đổi, thương hiệu, cân bằng hay JD mơ hồ, kèm câu hỏi nên hỏi HR trước khi đi phỏng vấn.
 - **Soạn email trả lời nhà tuyển dụng**: xác nhận lịch phỏng vấn, xin đổi lịch, từ chối lịch sự hoặc cảm ơn sau phỏng vấn. Soạn nhanh theo mẫu, hoặc dán email mời để AI viết thư và tự điền giờ, người liên hệ, vòng phỏng vấn.
 - **Xuất bảng Excel** (.xlsx) gồm tổng quan theo trạng thái, danh sách đơn đã ứng tuyển và các job chưa nộp.
 

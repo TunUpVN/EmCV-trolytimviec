@@ -451,6 +451,7 @@ function renderDetail(){
     h+=`<div class="panel"><div class="row"><h2 style="margin:0">Độ phù hợp</h2><span class="score" style="background:${scoreColor(j.score)}">${j.score}/100</span><b>${esc(f.verdict||"")}</b></div>
       <div class="two" style="margin-top:8px"><div><h3>Điểm mạnh</h3><ul class="plain">${(f.strengths||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
       <div><h3>Khoảng trống, rủi ro</h3><ul class="plain">${(f.gaps||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+      ${roleBox(f)}
       ${f.questions&&f.questions.length?`<h3>Nên hỏi nhà tuyển dụng</h3><ul class="plain">${f.questions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</div>`;
   }
   if(j.cv){
@@ -585,6 +586,11 @@ Trả về JSON đúng dạng: {"subject":"tiêu đề, nếu email mời có ti
     const m=$("ivMsg");if(m)m.textContent=fill?"Đã soạn thư và điền giúp thời gian, người liên hệ, vòng phỏng vấn từ email mời. Kiểm tra lại trước khi gửi.":"Đã soạn thư. Kiểm tra lại trước khi gửi.";
   }catch(e){busy.reply=false;renderDetail();const m=$("ivMsg");if(m)m.textContent=friendlyErr(e)}
 }
+const ROLE_LABEL={performance:["Thực chất: quảng cáo chuyển đổi","#b3261e"],brand:["Thực chất: thương hiệu, truyền thông","#1e7a46"],mixed:["Cân bằng quảng cáo và thương hiệu","#1f3a5f"],unclear:["JD mơ hồ, cần hỏi rõ","#a15c00"]};
+function roleBox(f){const k=String(f.roleType||"").trim().toLowerCase().split(/[^a-z]/)[0];const L=ROLE_LABEL[k];if(!L&&!(f.clarify&&f.clarify.length))return"";
+  return `<div style="margin-top:10px;border-left:4px solid ${L?L[1]:"#a15c00"};background:#fafafa;padding:8px 12px;border-radius:6px">
+    ${L?`<b style="color:${L[1]}">${esc(L[0])}</b>`:""}${f.roleNote?`<div class="note" style="margin-top:2px">${esc(f.roleNote)}</div>`:""}
+    ${f.clarify&&f.clarify.length?`<div style="margin-top:6px"><b>Hỏi HR trước khi đi phỏng vấn:</b><ul class="plain">${f.clarify.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}</div>`}
 function fitPreview(){const w=$("pvWrap"),s=$("pvScale");if(!w||!s)return;const k=Math.min(1,(w.clientWidth-32)/794);s.style.transform=`scale(${k})`;s.style.height=(1123*2+16)*k+"px";s.style.width=794*k+"px"}
 window.addEventListener("resize",fitPreview);
 
@@ -692,10 +698,17 @@ Vị trí: ${j.title||""}
 Công ty: ${j.company||""}
 ${j.jd||""}
 
-Trả về JSON đúng dạng: {"score": số 0-100, "verdict": "một câu kết luận ngắn", "strengths": ["3-5 điểm mạnh cụ thể"], "gaps": ["2-4 khoảng trống hoặc rủi ro, kể cả yêu cầu cứng không đáp ứng"], "questions": ["2-3 câu nên hỏi nhà tuyển dụng"], "title": "tên vị trí nếu tin có ghi", "company": "tên công ty nếu tin có ghi", "deadline": "hạn nộp dạng dd/mm/yyyy nếu JD có ghi, không có thì để rỗng"}. Viết tiếng Việt.`;
+PHÂN LOẠI BẢN CHẤT VỊ TRÍ (quan trọng, vì chức danh "Trưởng phòng Marketing" có thể là việc rất khác nhau):
+- "performance": việc chính là chạy quảng cáo chuyển đổi, đổ lead, tối ưu chi phí. Dấu hiệu: nhiệm vụ đầu tiên là chiến dịch quảng cáo và phân bổ ngân sách; chỉ số đánh giá xoay quanh lead, CPL, CPA, ROAS, chuyển đổi, doanh số; phần yêu cầu kinh nghiệm chỉ nêu tên kênh quảng cáo (Facebook, TikTok, Google); công ty bán khóa học hoặc dịch vụ qua đội telesales, tư vấn chờ lead.
+- "brand": việc chính là thương hiệu, truyền thông, PR, sự kiện, nội dung, tuyển sinh tổng thể; quảng cáo chỉ là một phần.
+- "mixed": hai mảng cân bằng, JD nói rõ cả hai.
+- "unclear": JD mô tả chung chung, không thấy rõ việc nào là chính, hoặc phần mô tả và phần yêu cầu kéo về hai hướng khác nhau.
+Nếu là "performance" mà ứng viên thiếu bằng chứng gần đây về quản lý ngân sách quảng cáo lớn, phải trừ điểm rõ và nêu trong verdict. Nếu "unclear" hoặc "performance", đưa 1-2 câu hỏi ngắn để ứng viên hỏi HR trước khi đi phỏng vấn, giúp làm rõ tỷ trọng công việc và ngân sách quảng cáo.
+
+Trả về JSON đúng dạng: {"score": số 0-100, "verdict": "một câu kết luận ngắn", "roleType": "performance | brand | mixed | unclear", "roleNote": "một câu nêu dấu hiệu cụ thể trong JD dẫn tới phân loại", "clarify": ["0-2 câu hỏi nên hỏi HR trước phỏng vấn, để rỗng nếu JD đã rõ và không phải performance"], "strengths": ["3-5 điểm mạnh cụ thể"], "gaps": ["2-4 khoảng trống hoặc rủi ro, kể cả yêu cầu cứng không đáp ứng"], "questions": ["2-3 câu nên hỏi nhà tuyển dụng"], "title": "tên vị trí nếu tin có ghi", "company": "tên công ty nếu tin có ghi", "deadline": "hạn nộp dạng dd/mm/yyyy nếu JD có ghi, không có thì để rỗng"}. Viết tiếng Việt.`;
   try{
     const r=await claudeJSON(prompt,{model:settings.model,maxTokens:2000});
-    const patch={score:Math.round(Number(r.score)||0),fit:{verdict:r.verdict||"",strengths:r.strengths||[],gaps:r.gaps||[],questions:r.questions||[]}};
+    const patch={score:Math.round(Number(r.score)||0),fit:{verdict:r.verdict||"",strengths:r.strengths||[],gaps:r.gaps||[],questions:r.questions||[],roleType:r.roleType||"",roleNote:r.roleNote||"",clarify:r.clarify||[]}};
     if(!j.title&&r.title)patch.title=r.title;if(!j.deadline&&r.deadline&&/\d{1,2}\/\d{1,2}\/\d{4}/.test(r.deadline))patch.deadline=r.deadline;if(!j.company&&r.company)patch.company=r.company;
     if((j.status||"new")==="new")patch.status="scored";
     busy.score=false;await saveJob(patch);
